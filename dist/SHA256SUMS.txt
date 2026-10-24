@@ -1,1 +1,1 @@
-aafb44025b87bc328f64f39a21b0be16851980731fb59aec587de9401cf88f46  snake-offline-v1.5.0.apk
+79f4d9d4e3ae396af6e22cde1c820ca094b2d140eccfacbc4874de0d3e89eef8  snake-offline-v1.5.5.apk

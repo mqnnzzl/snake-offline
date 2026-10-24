@@ -4,14 +4,14 @@
 
 一个原生 Android 单机小游戏。像素街机风格，深色底、荧光黄像素蛇与红色果实，无广告、无账号、不申请网络或存储权限。无需游戏引擎、WebView 或第三方运行库。
 
-[下载 Android 安装包](dist/snake-offline-v1.5.0.apk?raw=true) · [查看验证记录](dist/验证记录.txt)
+[下载 Android 安装包](dist/snake-offline-v1.5.5.apk?raw=true) · [查看验证记录](dist/验证记录.txt)
 
 <img src="dist/preview.png" alt="贪吃蛇 Android 游戏运行截图" width="320" />
 <img src="dist/settings-preview.png" alt="音乐开关与可调倒计时设置" width="480" />
 
 ## 安装
 
-安装文件：`dist/snake-offline-v1.5.0.apk`。已安装旧版时可直接覆盖安装，保留本地纪录。
+安装文件：`dist/snake-offline-v1.5.5.apk`。已安装旧版时可直接覆盖安装，保留本地纪录。
 
 把 APK 传到 Android 手机，使用文件管理器打开并安装。如果系统提示，请为打开此文件的应用允许“安装未知应用”。支持 Android 6.0 及以上；APK 使用本地专用密钥签名，可直接安装。
 

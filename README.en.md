@@ -1,6 +1,6 @@
 # SNAKE_
 
-[中文说明](README.md) · [Download Android APK v1.5.0](dist/snake-offline-v1.5.0.apk?raw=true)
+[中文说明](README.md) · [Download Android APK v1.5.5](dist/snake-offline-v1.5.5.apk?raw=true)
 
 A native, offline Android snake game with a dark pixel-arcade interface, lime snake, red pixel fruit and square controls. No ads, accounts, network access or third-party runtime libraries. Requires Android 6.0 or newer.
 
