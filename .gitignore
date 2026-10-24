@@ -1,0 +1,10 @@
+.tools/
+build/
+.signing/
+*.log
+local.properties
+dist/snake-source.zip
+*.p12
+*.jks
+*.keystore
+*.token
