@@ -16,7 +16,7 @@ public final class SnakeGameTest {
         SnakeGame g = new SnakeGame(new Random(1));
         int[] before = g.save(); g.tick();
         check(Arrays.equals(before, g.save()), "Ready board must not move");
-        g.start(); g.tick(); check(g.body.get(0).x == 9 && g.body.size() == 5, "Forward movement");
+        g.start(); g.tick(); check(g.body.get(0).x == 9 && g.body.size() == 3, "Three-cell opening and forward movement");
         g.turn(SnakeGame.LEFT); g.tick(); check(g.direction == SnakeGame.RIGHT, "Reject direct reversal");
         g.turn(SnakeGame.UP); g.turn(SnakeGame.LEFT); g.turn(SnakeGame.DOWN);
         g.tick(); check(g.direction == SnakeGame.UP, "Buffered turn one");
@@ -24,7 +24,7 @@ public final class SnakeGameTest {
         g.tick(); check(g.direction == SnakeGame.LEFT, "Buffer cannot exceed two");
 
         g = fresh(); for (int i = 0; i < 6; i++) g.tick();
-        check(g.score == 10 && g.body.size() == 6, "Eating grows snake and scores ten");
+        check(g.score == 10 && g.body.size() == 4, "Eating grows snake and scores ten");
         for (SnakeGame.Cell c : g.body) check(c.x != g.food.x || c.y != g.food.y, "Food never overlaps snake");
         g.pause(); before = g.save(); g.turn(SnakeGame.UP); g.tick();
         check(Arrays.equals(before, g.save()), "Pause stops movement and input");
@@ -50,7 +50,7 @@ public final class SnakeGameTest {
         for (int y = 0; y < 20; y++) for (int x = 0; x < 20; x++) if (!(y == 19 && (x == 18 || x == 19))) g.body.add(new SnakeGame.Cell(x, y));
         g.food = new SnakeGame.Cell(19, 19); g.tick();
         check(g.state == SnakeGame.State.WON && g.food == null && g.body.size() == 400, "Full board wins without hanging");
-        g.reset(); check(g.state == SnakeGame.State.READY && g.score == 0 && g.body.size() == 5, "Restart clears previous game");
+        g.reset(); check(g.state == SnakeGame.State.READY && g.score == 0 && g.body.size() == 3, "Restart clears previous game");
 
         // Thousands of random input sequences exercise geometry and state invariants.
         Random inputs = new Random(2026);
@@ -65,7 +65,7 @@ public final class SnakeGameTest {
                     int index = c.y * 20 + c.x;
                     check(!seen[index], "Live body has no overlapping cells"); seen[index] = true;
                 }
-                check(g.body.size() == 5 + g.score / 10, "Score and growth agree");
+                check(g.body.size() == 3 + g.score / 10, "Score and growth agree");
                 check(g.food == null || !seen[g.food.y * 20 + g.food.x], "Food stays in free cell");
             }
         }

@@ -24,7 +24,7 @@ public final class SnakeGame {
     public SnakeGame(Random random) { this.random = random; reset(); }
     public void reset() {
         body.clear();
-        for (int x = 8; x >= 4; x--) body.add(new Cell(x, 10));
+        for (int x = 8; x >= 6; x--) body.add(new Cell(x, 10));
         direction = RIGHT;
         score = 0;
         turns.clear();
@@ -34,15 +34,50 @@ public final class SnakeGame {
     }
     public void start() { if (state == State.READY || state == State.PAUSED) state = State.RUNNING; }
     public void pause() { if (state == State.RUNNING) state = State.PAUSED; }
-    public void turn(int next) {
-        if (state != State.RUNNING || next < 0 || next > 3 || turns.size() >= 2) return;
+    public boolean turn(int next) {
+        if (state != State.RUNNING || next < 0 || next > 3) return false;
         int previous = turns.isEmpty() ? direction : turns.peekLast();
-        if (next != previous && (next + 2) % 4 != previous) turns.addLast(next);
+        if (next == previous) return false;
+        if (turns.size() == 1 && next == direction) {
+            turns.clear(); return true;
+        }
+        if (turns.size() == 1 && (next + 2) % 4 == previous && (next + 2) % 4 != direction) {
+            // Correct a pending turn before reaching the junction (e.g. right -> up -> down).
+            turns.clear(); turns.addLast(next); return true;
+        }
+        if (turns.size() == 2) {
+            int first = turns.peekFirst();
+            if ((next + 2) % 4 == first) return false;
+            turns.removeLast();
+            if (next != first) turns.addLast(next);
+            return true;
+        }
+        if ((next + 2) % 4 == previous) return false;
+        turns.addLast(next); return true;
+    }
+    boolean applyTurn() {
+        if (turns.isEmpty()) return false;
+        direction = turns.removeFirst(); return true;
+    }
+    boolean canAdvance() {
+        Cell head = body.get(0);
+        int x = head.x + (direction == RIGHT ? 1 : direction == LEFT ? -1 : 0);
+        int y = head.y + (direction == DOWN ? 1 : direction == UP ? -1 : 0);
+        if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return false;
+        boolean ate = food != null && x == food.x && y == food.y;
+        int occupied = body.size() - (ate ? 0 : 1);
+        for (int i = 0; i < occupied; i++) if (body.get(i).x == x && body.get(i).y == y) return false;
+        return true;
     }
     /** Returns true only when a food was eaten. */
     public boolean tick() {
         if (state != State.RUNNING) return false;
-        if (!turns.isEmpty()) direction = turns.removeFirst();
+        applyTurn();
+        return moveForward();
+    }
+    // Commit the segment that has actually reached its destination, then choose the next turn.
+    boolean moveForward() {
+        if (state != State.RUNNING) return false;
         Cell head = body.get(0);
         int x = head.x + (direction == RIGHT ? 1 : direction == LEFT ? -1 : 0);
         int y = head.y + (direction == DOWN ? 1 : direction == UP ? -1 : 0);

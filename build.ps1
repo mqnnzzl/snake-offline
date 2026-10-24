@@ -27,9 +27,13 @@ function Invoke-Checked {
 New-Item -ItemType Directory -Force build,build/classes,build/dex,build/generated,build/tests,dist,.signing | Out-Null
 $sources = @(Get-ChildItem -Path app/src/main/java -Recurse -Filter '*.java' | ForEach-Object FullName)
 if (!$SkipTests) {
-    $testSources = @('app/src/main/java/com/mintarcade/snake/SnakeGame.java') + @(Get-ChildItem -Path tests -Recurse -Filter '*.java' | ForEach-Object FullName)
+    $testSources = @('SnakeGame', 'FrameClock', 'SnakeMotion', 'FramePacer', 'SwipeTracker', 'GamepadSteering') | ForEach-Object { "app/src/main/java/com/mintarcade/snake/$_.java" }
+    $testSources += @(Get-ChildItem -Path tests -Recurse -Filter '*.java' | ForEach-Object FullName)
     Invoke-Checked $javac (@('-encoding', 'UTF-8', '--release', '8', '-d', 'build/tests') + $testSources)
     Invoke-Checked $java @('-cp', 'build/tests', 'com.mintarcade.snake.SnakeGameTest')
+    Invoke-Checked $java @('-cp', 'build/tests', 'com.mintarcade.snake.RenderingTest')
+    Invoke-Checked $java @('-cp', 'build/tests', 'com.mintarcade.snake.InputResponseTest')
+    Invoke-Checked $java @('-cp', 'build/tests', 'com.mintarcade.snake.GamepadTest')
 }
 
 Invoke-Checked $aapt @('compile', '--dir', 'app/src/main/res', '-o', 'build/resources.zip')
@@ -54,10 +58,13 @@ if (!(Test-Path -LiteralPath $keyPath)) {
     Invoke-Checked $keytool @('-genkeypair', '-keystore', $keyPath, '-storetype', 'PKCS12', '-storepass:file', $passwordPath, '-alias', 'snake', '-keyalg', 'RSA', '-keysize', '2048', '-validity', '10000', '-dname', 'CN=Mint Arcade, OU=Offline Games, O=Mint Arcade, C=CN')
 }
 if (!(Test-Path -LiteralPath $passwordPath)) { throw 'The signing password file is missing; restore it from your private backup.' }
-$apk = 'dist/snake-offline-v1.0.0.apk'
+[xml]$manifest = Get-Content -Raw -Encoding UTF8 app/src/main/AndroidManifest.xml
+$versionName = $manifest.manifest.GetAttribute('versionName', 'http://schemas.android.com/apk/res/android')
+$apkName = "snake-offline-v$versionName.apk"
+$apk = Join-Path 'dist' $apkName
 Invoke-Checked $java @('-jar', $signer, 'sign', '--ks', $keyPath, '--ks-pass', "file:$passwordPath", '--ks-key-alias', 'snake', '--v1-signing-enabled', 'true', '--v2-signing-enabled', 'true', '--v3-signing-enabled', 'true', '--v4-signing-enabled', 'false', '--out', $apk, 'build/aligned.apk')
 Invoke-Checked $java @('-jar', $signer, 'verify', '--verbose', $apk)
 Invoke-Checked $zipalign @('-c', '-v', '4', $apk)
 $hash = (Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash.ToLowerInvariant()
-[IO.File]::WriteAllText((Join-Path $PSScriptRoot 'dist/SHA256SUMS.txt'), "$hash  snake-offline-v1.0.0.apk`n")
+[IO.File]::WriteAllText((Join-Path $PSScriptRoot 'dist/SHA256SUMS.txt'), "$hash  $apkName`n")
 Write-Host "Built and verified: $apk"
